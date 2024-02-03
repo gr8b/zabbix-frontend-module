@@ -1,0 +1,4 @@
+[submodule "zabbix"]
+	path = zabbix
+	url = https://git.zabbix.com/scm/zbx/zabbix.git
+	branch = master
