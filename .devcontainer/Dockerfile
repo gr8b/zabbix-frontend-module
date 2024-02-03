@@ -2,12 +2,24 @@ FROM mcr.microsoft.com/devcontainers/php:1-8.2-bookworm
 
 # Install MariaDB client
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get install -y mariadb-client \
-    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y mariadb-client libmariadb-dev libgettextpo-dev \
+        locales unzip \
+        libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
+        libaio1 libxml2-dev libldap2-dev \
+        automake shtool build-essential libaio-dev libcurl4-openssl-dev libevent-dev libgnutls28-dev \
+        libiksemel-dev libopenipmi-dev libpcre3-dev libsnmp-dev libssh2-1-dev \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/* \
+    && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ \
+    && docker-php-ext-install ldap bcmath gettext sockets
 
 # Install php-mysql driver
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
+# Install php-gd
+RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd
+
+# Install phpunit 8.5
 RUN curl -LO https://phar.phpunit.de/phpunit-8.5.phar
 RUN chmod +x phpunit-8.5.phar && mv phpunit-8.5.phar /usr/local/bin/phpunit
 
