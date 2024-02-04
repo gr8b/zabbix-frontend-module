@@ -36,7 +36,7 @@ add_web_files() {
 
     echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$directory/.htaccess"
     echo "<?php phpinfo();" > "$directory/index.php"
-    ln -s "$ZABBIXDIR" "$WORKDIR"
+    ln -s "$WORKDIR" "$ZABBIXDIR/ui/modules/dev-module"
 }
 
 # List remote branches on git.zabbix.com. Only release branches greater or equal release/5.0 are listed.
