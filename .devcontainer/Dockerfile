@@ -1,5 +1,14 @@
 FROM mcr.microsoft.com/devcontainers/php:1-8.2-bookworm
 
+# Install gum https://github.com/charmbracelet/gum
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+RUN apt-get update && apt-get install -y gum
+
+# Install firacode nerd font https://github.com/tonsky/FiraCode
+RUN apt-get install -y fonts-firacode
+
 # Install MariaDB client
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y mariadb-client libmariadb-dev libgettextpo-dev \
