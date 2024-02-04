@@ -17,11 +17,15 @@
 	"forwardPorts": [8080, 3306],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sudo chmod a+x \"$(pwd)\" && sudo rm -rf /var/www/html && sudo ln -s \"$(pwd)\" /var/www/html",
+	"postCreateCommand": {
+		"linkhome": "sudo chmod a+x \"$(pwd)\" && sudo rm -rf /var/www/html && sudo ln -s \"$(pwd)\" /var/www/html",
+		"starship": "echo 'eval \"$(starship init bash)\"' >> ~/.bashrc"
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"DEVSENSE.phptools-vscode"
+				"DEVSENSE.phptools-vscode",
+				"entuent.fira-code-nerd-font"
 			]
 		}
 	},

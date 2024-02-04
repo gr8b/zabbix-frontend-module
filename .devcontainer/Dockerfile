@@ -6,8 +6,11 @@ RUN curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/ap
 RUN echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
 RUN apt-get update && apt-get install -y gum
 
-# Install firacode nerd font https://github.com/tonsky/FiraCode
-RUN apt-get install -y fonts-firacode
+# Install starship https://starship.rs
+RUN curl https://starship.rs/install.sh -o starship.sh \
+    && chmod +x starship.sh \
+    && ./starship.sh -y \
+    && rm -rf ./starship.sh
 
 # Install MariaDB client
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -39,3 +42,10 @@ RUN chmod +x phpunit-8.5.phar && mv phpunit-8.5.phar /usr/local/bin/phpunit
 # [Optional] Uncomment this line to install global node packages.
 # RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
 
+
+
+
+
+# USER vscode
+
+# RUN eval "$(starship init bash)"
