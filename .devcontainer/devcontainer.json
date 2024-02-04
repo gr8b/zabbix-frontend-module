@@ -11,7 +11,7 @@
 
 	// Add the IDs of extensions you want installed when the container is created.
 	// start the apache webserver
-	"postStartCommand": "apachectl start",
+	"postStartCommand": "apachectl start 2>/dev/null && \"$(pwd)\"/.devcontainer/install.sh",
 
 	// For use with PHP or Apache (e.g.php -S localhost:8080 or apache2ctl start)
 	"forwardPorts": [8080, 3306],
@@ -21,6 +21,8 @@
 		"linkhome": "sudo chmod a+x \"$(pwd)\" && sudo rm -rf /var/www/html && sudo ln -s \"$(pwd)\" /var/www/html",
 		"starship": "echo 'eval \"$(starship init bash)\"' >> ~/.bashrc && starship preset nerd-font-symbols -o ~/.config/starship.toml"
 	},
+
+	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -29,9 +31,6 @@
 			]
 		}
 	},
-
-	// Configure tool-specific properties.
-	// "customizations": {},
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	"remoteUser": "vscode"

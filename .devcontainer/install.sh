@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if ! type -P gum &>/dev/null; then
+    echo "Please install gum utility from https://github.com/charmbracelet/gum"
+    exit 1
+fi
+
 export GUM_CHOOSE_CURSOR=" "
 export GUM_CHOOSE_CURSOR_FOREGROUND="#f00"
 
@@ -15,6 +20,7 @@ clone_zabbix() {
     local branch="$2"
 
     git clone --depth=1 --branch "$branch" https://git.zabbix.com/scm/zbx/zabbix.git "$directory"
+    # To pull history run: git fetch --unshallow
 }
 
 # Add .htaccess file with php settings suitable for zabbix frontend.
@@ -26,14 +32,8 @@ clone_zabbix() {
 add_web_files() {
     local directory="$1"
 
-    echo -e "$(cat <<EOL
-Options +Indexes
-php_value post_max_size 16M
-php_value max_execution_time 0
-EOL
-)" > "$directory/.htaccess"
-
-    echo -e "<?php phpinfo();" > "$directory/index.php"
+    echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$directory/.htaccess"
+    echo "<?php phpinfo();" > "$directory/index.php"
 }
 
 # List remote branches on git.zabbix.com. Only release branches greater or equal release/5.0 are listed.
@@ -48,11 +48,15 @@ select_branch() {
 
 # $1  zabbix branch
 checkout_branch() {
-    zabbix_branch=$(select_branch)
+    echo $1
 
     # if [ zabbix_branch]
 }
 
+# TODO: check if manifest.json file exists and contains "zabbix" key, use it as branch name to checkout
+while [[ -z "$branch" ]]; do
+    branch=$(select_branch)
+    echo "Please select branch."
+done
 
-selected=$(select_branch)
-echo "Branch selected: $selected"
+checkout_branch "$branch"
