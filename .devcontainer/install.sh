@@ -8,7 +8,8 @@ fi
 export GUM_CHOOSE_CURSOR=" "
 export GUM_CHOOSE_CURSOR_FOREGROUND="#f00"
 
-echo $(pwd)
+WORKDIR=$(pwd)
+ZABBIXDIR="/var/www/html"
 
 # Clone zabbix banch into specific directory.
 #
@@ -35,7 +36,7 @@ add_web_files() {
 
     echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$directory/.htaccess"
     echo "<?php phpinfo();" > "$directory/index.php"
-    ln -s
+    ln -s "$ZABBIXDIR" "$WORKDIR"
 }
 
 # List remote branches on git.zabbix.com. Only release branches greater or equal release/5.0 are listed.
@@ -62,7 +63,8 @@ while [[ -z "$branch" ]]; do
     branch=$(select_branch)
 done
 
-echo "Git clone $(gum style --foreground "#f00" "Zabbix $branch")"
-checkout_branch "$HOME/zabbix" "$branch"
+echo "Clone $(gum style --foreground "#f00" "Zabbix $branch")"
+checkout_branch "$ZABBIXDIR" "$branch"
 
-add_web_files "$HOME/zabbix"
+echo "Creating .htaccess and index.php files"
+add_web_files "$ZABBIXDIR"
