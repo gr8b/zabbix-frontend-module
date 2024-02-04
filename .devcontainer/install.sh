@@ -8,6 +8,7 @@ fi
 export GUM_CHOOSE_CURSOR=" "
 export GUM_CHOOSE_CURSOR_FOREGROUND="#f00"
 
+echo $(pwd)
 
 # Clone zabbix banch into specific directory.
 #
@@ -34,6 +35,7 @@ add_web_files() {
 
     echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$directory/.htaccess"
     echo "<?php phpinfo();" > "$directory/index.php"
+    ln -s
 }
 
 # List remote branches on git.zabbix.com. Only release branches greater or equal release/5.0 are listed.
@@ -42,21 +44,25 @@ add_web_files() {
 #   Branch without "release/" prefix selected by user
 #
 select_branch() {
-    echo "Select $(gum style --foreground "#f00" "Zabbix") version:"
     gum choose $(git ls-remote --heads https://git.zabbix.com/scm/zbx/zabbix.git | grep -Po "(?<=refs/heads/release/)\S+" | awk -F'.' '$2 ~ /^[0-9]+$/ && ($1 + 0.0) >= 5.0 {print $1 "." $2}') master
 }
 
-# $1  zabbix branch
+# $1:
+# $2:  zabbix branch
 checkout_branch() {
-    echo $1
+    local directory="$1"
+    local branch="$([ "$2" != "master" ] && echo "release/$2" || echo "$2")"
 
-    # if [ zabbix_branch]
+    clone_zabbix "$directory" "$branch"
 }
 
 # TODO: check if manifest.json file exists and contains "zabbix" key, use it as branch name to checkout
+echo "Select $(gum style --foreground "#f00" "Zabbix") version:"
 while [[ -z "$branch" ]]; do
     branch=$(select_branch)
-    echo "Please select branch."
 done
 
-checkout_branch "$branch"
+echo "Git clone $(gum style --foreground "#f00" "Zabbix $branch")"
+checkout_branch "$HOME/zabbix" "$branch"
+
+add_web_files "$HOME/zabbix"
