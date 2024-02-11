@@ -25,7 +25,7 @@ build_server() {
 
     cd $src_dir
     ./bootstrap.sh
-    ./configure --with-mysql --with-libcurl --enable-server --prefix=$src_dir
+    ./configure --silent --with-mysql --with-libcurl --enable-server --prefix=$src_dir
 
     # Add zabbix_server.conf file
 }
@@ -43,7 +43,7 @@ create_database() {
     local connection_string="$3"
 
     cd $sql_dir
-    make dbschema
+    make dbschema --silent
 
     mysql $connection_string -e"DROP DATABASE IF EXISTS \`$database\`;"
     mysql $connection_string -e"CREATE DATABASE \`$database\` CHARACTER SET utf8 COLLATE utf8_bin;"
@@ -60,15 +60,16 @@ create_database() {
 #
 add_web_files() {
     local directory="$1"
-    local branch="$1"
+    local branch="$2"
+    local port="10051"
 
     echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$directory/.htaccess"
     echo "<?php phpinfo();" > "$directory/phpinfo.php"
     ln -s "$work_dir" "$directory/ui/modules/dev-module"
 
     cp "$script_dir/zabbix.conf.php" "$zabbix_dir/ui/conf/zabbix.conf.php"
-    sed -i -e "s/\{ZBX_DATABASE}/$branch/" "$directory/ui/conf/zabbix.conf.php"
-    sed -i -e "s/\{ZBX_SERVER_PORT}/10051/" "$directory/ui/conf/zabbix.conf.php"
+    sed -i -e "s|{ZBX_DATABASE}|$branch|" "$directory/ui/conf/zabbix.conf.php"
+    sed -i -e "s|{ZBX_SERVER_PORT}|$port|" "$directory/ui/conf/zabbix.conf.php"
 }
 
 # List remote branches on git.zabbix.com. Only release branches greater or equal release/5.0 are listed.
