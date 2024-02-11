@@ -64,7 +64,7 @@ generate_web_files() {
     local branch="$2"
     local port="10051"
 
-    echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$dir/.htaccess"
+    echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0\nphp_value error_log $dir/php.error.log" > "$dir/.htaccess"
     echo "<?php phpinfo();" > "$dir/phpinfo.php"
     ln -s "$work_dir" "$dir/ui/modules/dev-module"
 
@@ -73,7 +73,7 @@ generate_web_files() {
     sed -i -e "s|{ZBX_SERVER_PORT}|$port|" "$dir/ui/conf/zabbix.conf.php"
 }
 
-# Generate module boilerplate files: Module.php, manifest.json
+# Generate module boilerplate files and directories: Module.php, manifest.json, actions, views
 #
 # Arguments:
 #   $1:   module directory
