@@ -85,8 +85,8 @@ generate_boilerplate() {
     local json=$(cat "$script_dir/boilerplate/manifest.json")
 
     echo "Updating manifest.json properties:"
-    local id=$(gum input --prompt "Module id: " --placeholder $(jq -r ".id" "$dir/manifest.json"))
-    local namespace=$(gum input --prompt "Module namespace: " --placeholder $(jq -r ".namespace" "$dir/manifest.json"))
+    local id=$(gum input --prompt "Module id: " --placeholder $(jq -r ".id" "$script_dir/manifest.json"))
+    local namespace=$(gum input --prompt "Module namespace: " --placeholder $(jq -r ".namespace" "$script_dir/manifest.json"))
 
     json=$(echo "$json" | jq --arg val "$manifest_version" '.manifest_version=$val')
 
