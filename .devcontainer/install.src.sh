@@ -60,10 +60,15 @@ create_database() {
 #
 add_web_files() {
     local directory="$1"
+    local branch="$1"
 
     echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$directory/.htaccess"
     echo "<?php phpinfo();" > "$directory/phpinfo.php"
-    ln -s "$work_dir" "$zabbix_dir/ui/modules/dev-module"
+    ln -s "$work_dir" "$directory/ui/modules/dev-module"
+
+    cp "$script_dir/zabbix.conf.php" "$zabbix_dir/ui/conf/zabbix.conf.php"
+    sed -i -e "s/\{ZBX_DATABASE}/$branch/" "$directory/ui/conf/zabbix.conf.php"
+    sed -i -e "s/\{ZBX_SERVER_PORT}/10051/" "$directory/ui/conf/zabbix.conf.php"
 }
 
 # List remote branches on git.zabbix.com. Only release branches greater or equal release/5.0 are listed.

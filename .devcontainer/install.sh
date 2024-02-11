@@ -28,7 +28,7 @@ echo "Clone $(gum style --foreground "#f00" "Zabbix $branch")"
 checkout_branch "$zabbix_dir" "$branch"
 
 echo "Creating .htaccess and index.php files"
-add_web_files "$zabbix_dir"
+add_web_files "$zabbix_dir" "$branch"
 
 echo "Build server and database schema"
 build_server "$zabbix_dir"
