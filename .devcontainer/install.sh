@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit the script if any command fails
+set -e
+
 if ! type -P gum &>/dev/null; then
     echo "Please install gum utility from https://github.com/charmbracelet/gum"
     exit 1

@@ -26,12 +26,11 @@ build_server() {
     cd $src_dir
     ./bootstrap.sh
     ./configure --with-mysql --with-libcurl --enable-server --prefix=$src_dir
-    make dbschema
 
     # Add zabbix_server.conf file
 }
 
-# Create database
+# Create database, will drop existing database. Runs make dbschema before import.
 #
 # Arguments:
 #   $1:  server sources directory with .sql files
@@ -44,6 +43,8 @@ create_database() {
     local connection_string="$3"
 
     cd $sql_dir
+    make dbschema
+
     mysql $connection_string -e"DROP DATABASE IF EXISTS \`$database\`;"
     mysql $connection_string -e"CREATE DATABASE \`$database\` CHARACTER SET utf8 COLLATE utf8_bin;"
     mysql $connection_string $database < database/mysql/schema.sql
@@ -74,8 +75,12 @@ select_branch() {
     gum choose $(git ls-remote --heads https://git.zabbix.com/scm/zbx/zabbix.git | grep -Po "(?<=refs/heads/release/)\S+" | awk -F'.' '$2 ~ /^[0-9]+$/ && ($1 + 0.0) >= 5.0 {print $1 "." $2}') master
 }
 
-# $1:
-# $2:  zabbix branch
+# Checkout Zabbix branch.
+#
+# Arguments:
+#   $1:  directory to clone directory to
+#   $2:  zabbix branch to clone, branch name should be without "release/" prefix. example: 5.0 6.4 master
+#
 checkout_branch() {
     local directory="$1"
     local branch="$([ "$2" != "master" ] && echo "release/$2" || echo "$2")"
