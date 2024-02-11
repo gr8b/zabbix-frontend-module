@@ -43,7 +43,7 @@ create_database() {
     local connection_string="$3"
 
     cd $sql_dir
-    make dbschema --silent
+    make dbschema_mysql --silent
 
     mysql $connection_string -e"DROP DATABASE IF EXISTS \`$database\`;"
     mysql $connection_string -e"CREATE DATABASE \`$database\` CHARACTER SET utf8 COLLATE utf8_bin;"
