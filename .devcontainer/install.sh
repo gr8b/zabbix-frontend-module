@@ -17,7 +17,6 @@ script_dir="$(dirname "$0")"
 
 source "$script_dir/install.src.sh"
 
-
 # TODO: check if manifest.json file exists and contains "zabbix" key, use it as branch name to checkout
 echo "Select $(gum style --foreground "#f00" "Zabbix") version:"
 while [[ -z "$branch" ]]; do

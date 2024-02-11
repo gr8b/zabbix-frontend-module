@@ -1,0 +1,16 @@
+{
+    "manifest_version": 2.0,
+    "type": "module",
+    "author": "",
+    "name": "",
+    "description": "",
+    "url": "",
+    "id": "",
+    "namespace": "",
+    "version": "1.0",
+    "assets": {
+        "css": [],
+        "js": []
+    },
+    "actions": {}
+}
