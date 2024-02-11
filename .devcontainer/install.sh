@@ -8,12 +8,12 @@ fi
 export GUM_CHOOSE_CURSOR=" "
 export GUM_CHOOSE_CURSOR_FOREGROUND="#f00"
 
-workdir=$(pwd)
-zabbixdir="/var/www/html"
+work_dir=$(pwd)
+zabbix_dir="/var/www/html"
+script_dir="$(dirname "$0")"
 
-source "install.src.sh"
+source "$script_dir/install.src.sh"
 
-container_init
 
 # TODO: check if manifest.json file exists and contains "zabbix" key, use it as branch name to checkout
 echo "Select $(gum style --foreground "#f00" "Zabbix") version:"
@@ -22,7 +22,7 @@ while [[ -z "$branch" ]]; do
 done
 
 echo "Clone $(gum style --foreground "#f00" "Zabbix $branch")"
-checkout_branch "$zabbixdir" "$branch"
+checkout_branch "$zabbix_dir" "$branch"
 
 echo "Creating .htaccess and index.php files"
-add_web_files "$zabbixdir"
+add_web_files "$zabbix_dir"

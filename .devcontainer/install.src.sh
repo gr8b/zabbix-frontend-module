@@ -1,8 +1,5 @@
-# Additional tasks to be run to initialize terminal
-#
-container_init() {
-    echo 'eval \"$(starship init bash)\"' >> ~/.bashrc && starship preset nerd-font-symbols -o ~/.config/starship.toml
-}
+# Helper functions
+
 
 # Clone zabbix banch into specific directory.
 #
@@ -29,7 +26,7 @@ add_web_files() {
 
     echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$directory/.htaccess"
     echo "<?php phpinfo();" > "$directory/phpinfo.php"
-    ln -s "$workdir" "$zabbixdir/ui/modules/dev-module"
+    ln -s "$work_dir" "$zabbix_dir/ui/modules/dev-module"
 }
 
 # List remote branches on git.zabbix.com. Only release branches greater or equal release/5.0 are listed.
