@@ -26,3 +26,9 @@ checkout_branch "$zabbix_dir" "$branch"
 
 echo "Creating .htaccess and index.php files"
 add_web_files "$zabbix_dir"
+
+echo "Build server and database schema"
+build_server "$zabbix_dir"
+
+echo "Create database $branch"
+create_database "$zabbix_dir" "$branch" "-h 127.0.0.1 -uroot -pmariadb"

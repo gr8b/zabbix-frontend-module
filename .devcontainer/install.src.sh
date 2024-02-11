@@ -15,6 +15,42 @@ clone_zabbix() {
     # To pull history run: git fetch --unshallow
 }
 
+# Build server, make database schema
+#
+# Arguments:
+#   $1:  server sources directory
+#
+build_server() {
+    local src_dir="$1"
+
+    cd $src_dir
+    ./bootstrap.sh
+    ./configure --with-mysql --with-libcurl --enable-server --prefix=$src_dir
+    make dbschema
+
+    # Add zabbix_server.conf file
+}
+
+# Create database
+#
+# Arguments:
+#   $1:  server sources directory with .sql files
+#   $2:  database name to create
+#   $3:  database connection string
+#
+create_database() {
+    local sql_dir="$1"
+    local database="$2"
+    local connection_string="$3"
+
+    cd $sql_dir
+    mysql $connection_string -e"DROP DATABASE IF EXISTS \`$database\`;"
+    mysql $connection_string -e"CREATE DATABASE \`$database\` CHARACTER SET utf8 COLLATE utf8_bin;"
+    mysql $connection_string $database < database/mysql/schema.sql
+    mysql $connection_string $database < database/mysql/images.sql
+    mysql $connection_string $database < database/mysql/data.sql
+}
+
 # Add .htaccess file with php settings suitable for zabbix frontend.
 # Add index.php file with phpinfo.
 #

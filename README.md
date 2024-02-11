@@ -25,7 +25,7 @@ ln -s $(pwd)/src $(pwd)/zabbix/ui/modules/module
 
 ## Todo
 
-- start `install.sh` script only when container is created for first time
+- (+) start `install.sh` script only when container is created for first time
 - checkout Zabbix branch to it own folder named by branch name in `/var/www/html`.
 - create module boilerplate if `manifest.json` is not present
 - if `manifest.json` is present use it version to filter out list of Zabbix branch allowed to checkout
