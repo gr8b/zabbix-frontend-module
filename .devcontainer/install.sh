@@ -51,3 +51,5 @@ build_server "$zabbix_dir"
 
 echo "Create database $branch"
 create_database "$zabbix_dir" "$branch" "-h 127.0.0.1 -uroot -pmariadb"
+
+echo "$(gum style --foreground "#0f0" "Done")"

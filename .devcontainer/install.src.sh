@@ -84,20 +84,26 @@ generate_boilerplate() {
     local manifest_version="$2"
     local json=$(cat "$script_dir/boilerplate/manifest.json")
 
-    echo "Input primary manifest.json"
-    local id=$(gum input --placeholder "Module id.")
-    local namespace=$(gum input --placeholder "Module namespace.")
+    echo "Updating manifest.json properties:"
+    local id=$(gum input --prompt "Module id: " --placeholder $(jq -r ".id" "$dir/manifest.json"))
+    local namespace=$(gum input --prompt "Module namespace: " --placeholder $(jq -r ".namespace" "$dir/manifest.json"))
 
     json=$(echo "$json" | jq --arg val "$manifest_version" '.manifest_version=$val')
-    json=$(echo "$json" | jq --arg val "$id" '.id=$val')
-    json=$(echo "$json" | jq --arg val "$namespace" '.namespace=$val')
+
+    if [ -n "$id" ]; then
+        json=$(echo "$json" | jq --arg val "$id" '.id=$val')
+    fi
+
+    if [ -n "$namespace" ]; then
+        json=$(echo "$json" | jq --arg val "$namespace" '.namespace=$val')
+    fi
 
     echo "$json" | jq '.' > "$dir/manifest.json"
     cp "$script_dir/boilerplate/Module.php" "$dir"
     sed -i -e "s|{ZBX_NAMESPACE}|$namespace|" "$dir/Module.php"
 
-    mkdir "$dir/actions"
-    mkdir "$dir/views"
+    mkdir -p "$dir/actions"
+    mkdir -p "$dir/views"
 }
 
 # List remote branches on git.zabbix.com.
