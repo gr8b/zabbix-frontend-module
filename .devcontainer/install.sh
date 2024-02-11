@@ -40,7 +40,7 @@ else
 fi
 
 echo "Clone $(gum style --foreground "#f00" "Zabbix $branch")"
-rm -rf "$zabbix_dir"
+rm -rf "$zabbix_dir/*"
 checkout_branch "$zabbix_dir" "$branch"
 
 echo "Creating .htaccess and index.php files for $branch"
