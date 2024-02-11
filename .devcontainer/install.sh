@@ -17,17 +17,34 @@ script_dir="$(dirname "$0")"
 
 source "$script_dir/install.src.sh"
 
-# TODO: check if manifest.json file exists and contains "zabbix" key, use it as branch name to checkout
-echo "Select $(gum style --foreground "#f00" "Zabbix") version:"
-while [[ -z "$branch" ]]; do
-    branch=$(select_branch)
-done
+if [ -f "$work_dir/manifest.json" ]; then
+    manifest_version=$(jq -r '.manifest_version' "$work_dir/manifest.json")
+
+    if [ "${manifest_version:0:1}" = "2" ]; then
+        select_branch "6.4" ""
+    else
+        select_branch "5.0" "6.2"
+    fi
+else
+    echo "Select $(gum style --foreground "#f00" "Zabbix") version:"
+    while [[ -z "$branch" ]]; do
+        branch=$(select_branch "5.0" "")
+    done
+
+    echo "Adding module boilerplate files."
+    if awk -v var="$your_variable" 'BEGIN { if (var >= 6.4 || var == "master") exit 0; else exit 1 }'; then
+        generate_boilerplate "$work_dir" "2"
+    else
+        generate_boilerplate "$work_dir" "1"
+    fi
+fi
 
 echo "Clone $(gum style --foreground "#f00" "Zabbix $branch")"
+rm -rf "$zabbix_dir"
 checkout_branch "$zabbix_dir" "$branch"
 
 echo "Creating .htaccess and index.php files for $branch"
-add_web_files "$zabbix_dir" "$branch"
+generate_web_files "$zabbix_dir" "$branch"
 
 echo "Build server and database schema"
 build_server "$zabbix_dir"

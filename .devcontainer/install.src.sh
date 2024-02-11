@@ -57,28 +57,72 @@ create_database() {
 #
 # Arguments:
 #   $1:  abosulte path to directory where to add .htaccess file
+#   $2:  branch name, without "release/" prefix
 #
-add_web_files() {
-    local directory="$1"
+generate_web_files() {
+    local dir="$1"
     local branch="$2"
     local port="10051"
 
-    echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$directory/.htaccess"
-    echo "<?php phpinfo();" > "$directory/phpinfo.php"
-    ln -s "$work_dir" "$directory/ui/modules/dev-module"
+    echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0" > "$dir/.htaccess"
+    echo "<?php phpinfo();" > "$dir/phpinfo.php"
+    ln -s "$work_dir" "$dir/ui/modules/dev-module"
 
     cp "$script_dir/zabbix.conf.php" "$zabbix_dir/ui/conf/zabbix.conf.php"
-    sed -i -e "s|{ZBX_DATABASE}|$branch|" "$directory/ui/conf/zabbix.conf.php"
-    sed -i -e "s|{ZBX_SERVER_PORT}|$port|" "$directory/ui/conf/zabbix.conf.php"
+    sed -i -e "s|{ZBX_DATABASE}|$branch|" "$dir/ui/conf/zabbix.conf.php"
+    sed -i -e "s|{ZBX_SERVER_PORT}|$port|" "$dir/ui/conf/zabbix.conf.php"
 }
 
-# List remote branches on git.zabbix.com. Only release branches greater or equal release/5.0 are listed.
+# Generate module boilerplate files: Module.php, manifest.json
+#
+# Arguments:
+#   $1:   module directory
+#   $2:   manifest version: 1, 2
+#
+generate_boilerplate() {
+    local dir="$1"
+    local manifest_version="$2"
+    local json=$(cat "$script_dir/boilerplate/manifest.json")
+
+    echo "Input primary manifest.json"
+    local id=$(gum input --placeholder "Module id.")
+    local namespace=$(gum input --placeholder "Module namespace.")
+
+    json=$(echo "$json" | jq --arg val "$manifest_version" '.manifest_version=$val')
+    json=$(echo "$json" | jq --arg val "$id" '.id=$val')
+    json=$(echo "$json" | jq --arg val "$namespace" '.namespace=$val')
+
+    echo "$json" | jq '.' > "$dir/manifest.json"
+    cp "$script_dir/boilerplate/Module.php" "$dir"
+    sed -i -e "s|{ZBX_NAMESPACE}|$namespace|" "$dir/Module.php"
+
+    mkdir "$dir/actions"
+    mkdir "$dir/views"
+}
+
+# List remote branches on git.zabbix.com.
+#
+# Arguments:
+#   $1:   branch minimal version, inclusive, ignored when set to empty string.
+#   $2:   branch maximal version, inclusive, ignored when set to empty string.
 #
 # Returns:
 #   Branch without "release/" prefix selected by user
 #
 select_branch() {
-    gum choose $(git ls-remote --heads https://git.zabbix.com/scm/zbx/zabbix.git | grep -Po "(?<=refs/heads/release/)\S+" | awk -F'.' '$2 ~ /^[0-9]+$/ && ($1 + 0.0) >= 5.0 {print $1 "." $2}') master
+    local min_version="$1"
+    local max_version="$2"
+
+    gum choose $(git ls-remote --heads https://git.zabbix.com/scm/zbx/zabbix.git \
+        | grep -Po "(?<=refs/heads/release/)\S+" \
+        | awk -F'.' \
+            -v max_version="$max_version" \
+            -v min_version="$min_version" \
+            '$2 ~ /^[0-9]+$/ \
+            && (!min_version || ($1 "." $2) >= min_version) \
+            && (!max_version || ($1 "." $2) <= max_version) \
+            {print $1 "." $2}' \
+        ) $(awk -v max_version="$max_version" 'BEGIN { if (!max_version || max_version >= 6.4) print "master"; else print "" }')
 }
 
 # Checkout Zabbix branch.

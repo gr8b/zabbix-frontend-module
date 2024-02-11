@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\ZBX_MODULE;
+namespace Modules\{ZBX_NAMESPACE};
 
 use CController as Action;
 use Zabbix\Core\CModule;
