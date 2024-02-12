@@ -74,6 +74,7 @@ generate_web_files() {
 }
 
 # Generate module boilerplate files and directories: Module.php, manifest.json, actions, views
+# doc: https://www.zabbix.com/documentation/current/en/devel/modules/file_structure/manifest
 #
 # Arguments:
 #   $1:   module directory
@@ -87,6 +88,10 @@ generate_boilerplate() {
     echo "Updating manifest.json properties:"
     local id=$(gum input --prompt "Module id: " --placeholder $(jq -r ".id" "$script_dir/boilerplate/manifest.json"))
     local namespace=$(gum input --prompt "Module namespace: " --placeholder $(jq -r ".namespace" "$script_dir/boilerplate/manifest.json"))
+
+    if [ "${manifest_version:0:1}" = "1" ]; then
+        json=$(echo "$json" | jq 'del(.assets)')
+    fi
 
     json=$(echo "$json" | jq --arg val "$manifest_version" '.manifest_version=$val')
 
@@ -135,7 +140,7 @@ select_branch() {
 #
 # Arguments:
 #   $1:  directory to clone directory to
-#   $2:  zabbix branch to clone, branch name should be without "release/" prefix. example: 5.0 6.4 master
+#   $2:  zabbix branch to clone, branch name should be without "release/" prefix. example: 6.0 6.4 master
 #
 checkout_branch() {
     local directory="$1"

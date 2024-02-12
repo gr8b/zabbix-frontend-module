@@ -1,7 +1,8 @@
 ## How to
 
-Use this repository as template to create your own module repository.
-In *Visual Studio Code* use "Clone repository in container volume" to create local development environment.
+Use this repository as template to create your own module repository.\
+In *Visual Studio Code* use "Clone repository in container volume" to create local development environment.\
+Zabbix versions less than 6.0 are not supported due incompatibility with PHP8.2
 
 ## Container software
 

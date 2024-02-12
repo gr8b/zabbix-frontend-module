@@ -23,12 +23,12 @@ if [ -f "$work_dir/manifest.json" ]; then
     if [ "${manifest_version:0:1}" = "2" ]; then
         branch=$(select_branch "6.4" "")
     else
-        branch=$(select_branch "5.0" "6.2")
+        branch=$(select_branch "6.0" "6.2")
     fi
 else
     echo "Select $(gum style --foreground "#f00" "Zabbix") version:"
     while [[ -z "$branch" ]]; do
-        branch=$(select_branch "5.0" "")
+        branch=$(select_branch "6.0" "")
     done
 
     gum style --foreground="#ff0" "Adding module boilerplate files."
