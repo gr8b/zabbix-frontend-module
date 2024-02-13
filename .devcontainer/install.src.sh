@@ -25,9 +25,39 @@ build_server() {
 
     cd $src_dir
     ./bootstrap.sh
-    ./configure --silent --with-mysql --with-libcurl --enable-server --prefix=$src_dir
+    ./configure --with-mysql --with-libcurl --enable-server --prefix="$src_dir"
 
-    # Add zabbix_server.conf file
+    make install
+}
+
+# Stop Zabbix server if it is running.
+#
+# Arguments:
+#   $1:   directory with zabbix_server.pid file
+#
+stop_server() {
+    local server_dir="$1"
+    local pid_file="$server_dir/zabbix_server.pid"
+
+    if [ -f "$pid_file" ]; then
+        pid=$(cat "$pid_file")
+
+        if ps -p "$pid" > /dev/null; then
+            kill "$pid"
+        fi
+    fi
+}
+
+# Start Zabbix server.
+#
+# Arguments:
+#   $1:   directory with zabbis_server and zabbix_server.conf files
+#
+start_server() {
+    local server_dir="$1"
+    local conf_file="$server_dir/zabbix_server.conf"
+
+    "$server_dir/zabbix_server" -c "$conf_file"
 }
 
 # Create database, will drop existing database. Runs make dbschema before import.
@@ -57,20 +87,48 @@ create_database() {
 #
 # Arguments:
 #   $1:  abosulte path to directory where to add .htaccess file
-#   $2:  branch name, without "release/" prefix
 #
-generate_web_files() {
+create_web_files() {
     local dir="$1"
-    local branch="$2"
-    local port="10051"
 
     echo -e "Options +Indexes\nphp_value post_max_size 16M\nphp_value max_execution_time 0\nphp_value error_log $dir/php.error.log" > "$dir/.htaccess"
     echo "<?php phpinfo();" > "$dir/phpinfo.php"
     ln -s "$work_dir" "$dir/ui/modules/dev-module"
+}
 
-    cp "$script_dir/zabbix.conf.php" "$zabbix_dir/ui/conf/zabbix.conf.php"
-    sed -i -e "s|{ZBX_DATABASE}|$branch|" "$dir/ui/conf/zabbix.conf.php"
-    sed -i -e "s|{ZBX_SERVER_PORT}|$port|" "$dir/ui/conf/zabbix.conf.php"
+# Generate server and ui configuration files.
+#
+# Arguments:
+#   $1:   absolute path to ui files root folder
+#   $2:   database name
+#
+create_conf_files() {
+    local dir="$1"
+    local db_name="$2"
+    local port="10051"
+    local db_user="root"
+    local db_password="mariadb"
+
+    # Frontend configuration file
+    local ui_conf=$(cat "$script_dir/zabbix.conf.php")
+    local ui_dir="$dir/ui/conf"
+
+    ui_conf="${ui_conf//\{ZBX_DATABASE\}/$db_name}"
+    ui_conf="${ui_conf/\{ZBX_PORT\}/$port}"
+    ui_conf="${ui_conf/\{ZBX_USER\}/$db_user}"
+    ui_conf="${ui_conf/\{ZBX_PASSWORD\}/$db_password}"
+    echo "$ui_conf" > "$ui_dir/zabbix.conf.php"
+
+    # Server configuration file
+    local server_conf=$(cat "$script_dir/zabbix_server.conf")
+    local server_dir="/var/www/html/sbin"
+
+    server_conf="${server_conf/\{ZBX_PORT\}/$port}"
+    server_conf="${server_conf//\{ZBX_DIR\}/$server_dir}"
+    server_conf="${server_conf/\{ZBX_DATABASE\}/$db_name}"
+    server_conf="${server_conf/\{ZBX_USER\}/$db_user}"
+    server_conf="${server_conf/\{ZBX_PASSWORD\}/$db_password}"
+    echo "$server_conf" > "$server_dir/zabbix_server.conf"
 }
 
 # Generate module boilerplate files and directories: Module.php, manifest.json, actions, views
@@ -91,6 +149,9 @@ generate_boilerplate() {
 
     if [ "${manifest_version:0:1}" = "1" ]; then
         json=$(echo "$json" | jq 'del(.assets)')
+    else
+        mkdir -p "$dir/assets/js"
+        mkdir -p "$dir/assets/css"
     fi
 
     json=$(echo "$json" | jq --arg val "$manifest_version" '.manifest_version=$val')
@@ -146,5 +207,6 @@ checkout_branch() {
     local directory="$1"
     local branch="$([ "$2" != "master" ] && echo "release/$2" || echo "$2")"
 
+    rm -rf $directory/{*,.*}
     clone_zabbix "$directory" "$branch"
 }

@@ -10,12 +10,38 @@ fi
 
 export GUM_CHOOSE_CURSOR=" "
 export GUM_CHOOSE_CURSOR_FOREGROUND="#f00"
+export GUM_SPIN_SPINNER="minidot"
+export GUM_SPIN_SPINNER_FOREGROUND="#0f0"
 
 work_dir=$(pwd)
 zabbix_dir="/var/www/html"
-script_dir="$(dirname "$0")"
+script_dir=$(dirname "$(realpath "$0")")
 
 source "$script_dir/install.src.sh"
+
+
+if [ "$#" -ne 0 ]; then
+    case "$1" in
+        "checkout_branch")
+            checkout_branch "$2" "$3"
+            ;;
+        "build_server")
+            build_server "$2"
+            ;;
+        "create_web_files")
+            create_web_files "$2" "$3"
+            ;;
+        "create_conf_files")
+            create_conf_files "$2" "$3"
+            ;;
+        "create_database")
+            create_database "$2" "$3" "-h 127.0.0.1 -uroot -pmariadb"
+            ;;
+    esac
+
+    exit 0
+fi
+
 
 if [ -f "$work_dir/manifest.json" ]; then
     manifest_version=$(jq -r '.manifest_version' "$work_dir/manifest.json")
@@ -39,18 +65,21 @@ else
     fi
 fi
 
-echo "Clone $(gum style --foreground "#f00" "Zabbix $branch")"
-rm -rf $zabbix_dir/{*,.*}
-checkout_branch "$zabbix_dir" "$branch"
 
-gum style --foreground="#ff0" "Creating .htaccess and index.php files for $branch"
-generate_web_files "$zabbix_dir" "$branch"
+gum spin --title "Cloning $branch branch" -- $0 checkout_branch "$zabbix_dir" "$branch"
+gum style --foreground "#0f0" "󱓏 Cloned $branch branch to $zabbix_dir"
 
-gum style --foreground="#ff0" "Build server and database schema"
-# TODO: find how to use spinner, gum spin --spinner minidot --title "Title"
-build_server "$zabbix_dir"
+gum spin --title "Creating web server files" -- $0 create_web_files "$zabbix_dir" "$branch"
+gum style --foreground "#0f0" "󱥾 Created web server files in $zabbix_dir"
 
-gum style --foreground="#ff0" "Create database $branch"
-create_database "$zabbix_dir" "$branch" "-h 127.0.0.1 -uroot -pmariadb"
+gum spin --title "Build server and database schema" -- $0 build_server "$zabbix_dir"
+gum style --foreground "#0f0" "󰪩 Server build and database schema done"
 
-gum style --foreground "#0f0" "Done"
+gum spin --title "Creating configuration files" -- $0 create_conf_files "$zabbix_dir" "$branch"
+gum style --foreground "#0f0" "󱥾 Configuration files created"
+
+gum spin --title "Creating database $branch" -- $0 create_database "$zabbix_dir" "$branch"
+gum style --foreground "#0f0" "󰪩 Database $branch created"
+
+gum spin --title "Starting Zabbix server" -- "$zabbix_dir/sbin/zabbix_server" -c "$zabbix_dir/sbin/zabbix_server.conf"
+gum style --foreground "#0f0" " All done, happy coding!"

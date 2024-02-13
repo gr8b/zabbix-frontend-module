@@ -5,8 +5,8 @@ $DB['TYPE']			= 'MYSQL';
 $DB['SERVER']		= '127.0.0.1';
 $DB['PORT']			= '3306';
 $DB['DATABASE']		= '{ZBX_DATABASE}';
-$DB['USER']			= 'root';
-$DB['PASSWORD']		= 'mariadb';
+$DB['USER']			= '{ZBX_USER}';
+$DB['PASSWORD']		= '{ZBX_PASSWORD}';
 
 // Schema name. Used for PostgreSQL.
 $DB['SCHEMA']			= '';
@@ -36,7 +36,7 @@ $DB['DOUBLE_IEEE754']		= true;
 
 // Uncomment and set to desired values to override Zabbix hostname/IP and port.
 $ZBX_SERVER			= '127.0.0.1';
-$ZBX_SERVER_PORT	= '{ZBX_SERVER_PORT}';
+$ZBX_SERVER_PORT	= '{ZBX_PORT}';
 
 $ZBX_SERVER_NAME		= '{ZBX_DATABASE}';
 
