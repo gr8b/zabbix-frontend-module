@@ -123,12 +123,14 @@ create_conf_files() {
     local server_conf=$(cat "$script_dir/zabbix_server.conf")
     local server_dir="/var/www/html/sbin"
 
-    server_conf="${server_conf/\{ZBX_PORT\}/$port}"
-    server_conf="${server_conf//\{ZBX_DIR\}/$server_dir}"
-    server_conf="${server_conf/\{ZBX_DATABASE\}/$db_name}"
-    server_conf="${server_conf/\{ZBX_USER\}/$db_user}"
-    server_conf="${server_conf/\{ZBX_PASSWORD\}/$db_password}"
-    echo "$server_conf" > "$server_dir/zabbix_server.conf"
+    if [ -d "$server_dir" ]; then
+        server_conf="${server_conf/\{ZBX_PORT\}/$port}"
+        server_conf="${server_conf//\{ZBX_DIR\}/$server_dir}"
+        server_conf="${server_conf/\{ZBX_DATABASE\}/$db_name}"
+        server_conf="${server_conf/\{ZBX_USER\}/$db_user}"
+        server_conf="${server_conf/\{ZBX_PASSWORD\}/$db_password}"
+        echo "$server_conf" > "$server_dir/zabbix_server.conf"
+    fi
 }
 
 # Generate module boilerplate files and directories: Module.php, manifest.json, actions, views
@@ -209,4 +211,13 @@ checkout_branch() {
 
     rm -rf $directory/{*,.*}
     clone_zabbix "$directory" "$branch"
+}
+
+# Show succss message.
+#
+# Arguments:
+#   $1:  success message
+#
+success() {
+    gum style --foreground "#0f0" "$1"
 }

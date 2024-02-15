@@ -10,6 +10,8 @@ fi
 
 export GUM_CHOOSE_CURSOR=" "
 export GUM_CHOOSE_CURSOR_FOREGROUND="#f00"
+export GUM_CONFIRM_SELECTED_FOREGROUND="#f00"
+export GUM_CONFIRM_TIMEOUT="5s"
 export GUM_SPIN_SPINNER="minidot"
 export GUM_SPIN_SPINNER_FOREGROUND="#0f0"
 
@@ -36,6 +38,9 @@ if [ "$#" -ne 0 ]; then
             ;;
         "create_database")
             create_database "$2" "$3" "-h 127.0.0.1 -uroot -pmariadb"
+            ;;
+        "help")
+            gum pager < "$script_dir/README.md"
             ;;
     esac
 
@@ -67,19 +72,26 @@ fi
 
 
 gum spin --title "Cloning $branch branch" -- $0 checkout_branch "$zabbix_dir" "$branch"
-gum style --foreground "#0f0" "󱓏 Cloned $branch branch to $zabbix_dir"
+success "󱓏 Cloned $branch branch to $zabbix_dir"
 
 gum spin --title "Creating web server files" -- $0 create_web_files "$zabbix_dir" "$branch"
-gum style --foreground "#0f0" "󱥾 Created web server files in $zabbix_dir"
+success "󱥾 Created web server files in $zabbix_dir"
 
-gum spin --title "Build server and database schema" -- $0 build_server "$zabbix_dir"
-gum style --foreground "#0f0" "󰪩 Server build and database schema done"
+with_server=1 && gum confirm "Compile and build Zabbix server?"
+
+if [ "$with_server" -eq 1 ]; then
+    gum spin --title "Build server and database schema" -- $0 build_server "$zabbix_dir"
+    success "󰪩 Server build and database schema done"
+fi
 
 gum spin --title "Creating configuration files" -- $0 create_conf_files "$zabbix_dir" "$branch"
-gum style --foreground "#0f0" "󱥾 Configuration files created"
+success "󱥾 Configuration files created"
 
 gum spin --title "Creating database $branch" -- $0 create_database "$zabbix_dir" "$branch"
-gum style --foreground "#0f0" "󰪩 Database $branch created"
+success "󰪩 Database $branch created"
 
-gum spin --title "Starting Zabbix server" -- "$zabbix_dir/sbin/zabbix_server" -c "$zabbix_dir/sbin/zabbix_server.conf"
-gum style --foreground "#0f0" " All done, happy coding!"
+if [ "$with_server" -eq 1 ]; then
+    gum spin --title "Starting Zabbix server" -- "$zabbix_dir/sbin/zabbix_server" -c "$zabbix_dir/sbin/zabbix_server.conf"
+fi
+
+success " All done, happy coding!"
