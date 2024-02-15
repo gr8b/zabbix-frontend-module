@@ -145,7 +145,6 @@ generate_boilerplate() {
     local manifest_version="$2"
     local json=$(cat "$script_dir/boilerplate/manifest.json")
 
-    echo "Updating manifest.json properties:"
     local id=$(gum input --prompt "Module id: " --placeholder $(jq -r ".id" "$script_dir/boilerplate/manifest.json"))
     local namespace=$(gum input --prompt "Module namespace: " --placeholder $(jq -r ".namespace" "$script_dir/boilerplate/manifest.json"))
 
@@ -164,6 +163,8 @@ generate_boilerplate() {
 
     if [ -n "$namespace" ]; then
         json=$(echo "$json" | jq --arg val "$namespace" '.namespace=$val')
+    else
+        namespace=$(jq -r ".namespace" "$script_dir/boilerplate/manifest.json")
     fi
 
     echo "$json" | jq '.' > "$dir/manifest.json"
@@ -187,7 +188,8 @@ select_branch() {
     local min_version="$1"
     local max_version="$2"
 
-    gum choose $(git ls-remote --heads https://git.zabbix.com/scm/zbx/zabbix.git \
+    gum choose --header "Select Zabbix version:" \
+        $(git ls-remote --heads https://git.zabbix.com/scm/zbx/zabbix.git \
         | grep -Po "(?<=refs/heads/release/)\S+" \
         | awk -F'.' \
             -v max_version="$max_version" \

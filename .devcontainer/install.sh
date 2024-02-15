@@ -10,6 +10,7 @@ fi
 
 export GUM_CHOOSE_CURSOR=" "
 export GUM_CHOOSE_CURSOR_FOREGROUND="#f00"
+export GUM_INPUT_CURSOR_FOREGROUND="#f00"
 export GUM_CONFIRM_SELECTED_FOREGROUND="#f00"
 export GUM_CONFIRM_TIMEOUT="5s"
 export GUM_SPIN_SPINNER="minidot"
@@ -57,17 +58,17 @@ if [ -f "$work_dir/manifest.json" ]; then
         branch=$(select_branch "6.0" "6.2")
     fi
 else
-    echo "Select $(gum style --foreground "#f00" "Zabbix") version:"
     while [[ -z "$branch" ]]; do
         branch=$(select_branch "6.0" "")
     done
 
-    gum style --foreground="#ff0" "Adding module boilerplate files."
     if awk -v var="$branch" 'BEGIN { if (var >= 6.4 || var == "master") exit 0; else exit 1 }'; then
         generate_boilerplate "$work_dir" "2"
     else
         generate_boilerplate "$work_dir" "1"
     fi
+
+    success "󰓠 Module boilerplate files created"
 fi
 
 
