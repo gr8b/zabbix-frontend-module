@@ -21,7 +21,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         automake shtool build-essential libaio-dev libcurl4-openssl-dev libevent-dev libgnutls28-dev \
         libiksemel-dev libopenipmi-dev libpcre3-dev libsnmp-dev libssh2-1-dev \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/* \
-    && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ \
+    && docker-php-ext-configure ldap \
     && docker-php-ext-install ldap bcmath gettext sockets
 
 # Install php-mysql driver
