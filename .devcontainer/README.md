@@ -43,3 +43,4 @@ git config --global user.email email@example.com
 - (+) init database and `conf/zabbix.conf.php` file
 - add start/stop Zabbix server helper, make it as module copied during installation or `.bashrc` helper
 - add helper to create action, view, asset file as `.bashrc` helper
+- add php7.4 to original Dockerfile to be able to create modules for Zabbix version 5.0+
